@@ -4,6 +4,8 @@ import pandas as pd
 import xgboost as xgb
 import matplotlib.pyplot as plt
 
+from sklearn.ensemble import RandomForestRegressor
+
 
 class RULES(object):
     def __init__(self, WIFI_Records, pre_time, pre_WIFIAPTag):
@@ -90,7 +92,8 @@ class XGBOOST(object):
         dtrain = xgb.DMatrix(X_train, y_train)
         dval = xgb.DMatrix(X_val, y_val)
         num_round = 60
-        params = {"bst:max_depth": 7,
+        params = {# "booster": 'gblinear'
+                  "bst:max_depth": 7,
                   "bst:eta": 0.01,
                   "subsample": 0.8,
                   "colsample_bytree": 1,
@@ -99,7 +102,7 @@ class XGBOOST(object):
                   "nthread": 6,
                   "seed": 42}
         evallist = [(dtrain, "train"), (dval, "val")]
-        self.bst = xgb.train(params, dtrain, num_round, evallist, feval=self.mae_xg,
+        self.bst = xgb.train(params, dtrain, num_round, evallist, # feval=self.mae_xg,
                              verbose_eval=10, early_stopping_rounds=10)
         xgb.plot_importance(self.bst)
         plt.show()
@@ -112,6 +115,20 @@ class XGBOOST(object):
     def guess(self, X_test):
         dtest = xgb.DMatrix(X_test)
         return self.bst.predict(dtest)
+
+class RF(object):
+    def __init__(self, X_train, y_train, X_val, y_val):
+        self.clf = RandomForestRegressor(n_estimators=20, verbose=True, max_depth=7)
+        self.clf.fit(X_train, y_train)
+        print("Mae on validation data: ", self.evaluate(X_val, y_val))
+
+    def evaluate(self, X_val, y_val):
+        y_val_pre = self.guess(X_val)
+        return np.mean(np.abs(np.expm1(y_val_pre) - np.expm1(y_val)))
+
+    def guess(self, X_test):
+        return self.clf.predict(X_test)
+
 
 
 
