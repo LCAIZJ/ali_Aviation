@@ -45,27 +45,11 @@ class RULES(object):
         train_data["time"] = train_data["slice10min"].apply(lambda x: x[-4:])
         train_data = train_data.groupby(by=["time", "WIFIAPTag"])["passengerCount"].mean().round(2).reset_index()
         # pre_oldtime = [every_time[-4:] for every_time in self.pre_time]
-        train_data["slice10min"] = train_data["time"].apply(lambda x: "2016-09-14-"+x)
-
+        train_data["slice10min"] = train_data["time"].apply(lambda x: "2016-09-25-"+x)
         del train_data["time"]
-        train_data["slice10min"] == "2016-09-14-15-0"
         pre_value = train_data.loc[train_data["slice10min"].isin(self.pre_time),
                                    ["passengerCount", "WIFIAPTag", "slice10min"]]
         # pre_value.to_csv("submissions/train_data.csv", index=False)
-        '''
-        print (pre_oldtime)
-        # for group in train_data.groupby(by=["WIFIAPTag"]):
-            # print group[1]["slice10min"]
-            # break
-            # group[1]["slice10min"]
-        for group in train_data.groupby(by=["time"]):
-            # print group[0]
-            # if group[0] in pre_oldtime:
-
-
-            break
-        '''
-
         # train_data.to_csv("clean_data/train_data.csv", index=False)
         print("Mean_solution_two END!")
         return pre_value
@@ -80,7 +64,7 @@ class RULES(object):
         train_data["time"] = train_data["slice10min"].apply(lambda x: x[-4:])
         train_data = train_data.groupby(by=["time", "WIFIAPTag"])["passengerCount"].median().reset_index()
         pre_oldtime = [every_time[-4:] for every_time in self.pre_time]
-        train_data["slice10min"] = train_data["time"].apply(lambda x: "2016-09-14-" + x)
+        train_data["slice10min"] = train_data["time"].apply(lambda x: "2016-09-25-" + x)
         del train_data["time"]
         pre_value = train_data.loc[train_data["slice10min"].isin(self.pre_time),
                                    ["passengerCount", "WIFIAPTag", "slice10min"]]
@@ -93,8 +77,8 @@ class XGBOOST(object):
         dval = xgb.DMatrix(X_val, y_val)
         num_round = 60
         params = {# "booster": 'gblinear'
-                  "bst:max_depth": 7,
-                  "bst:eta": 0.01,
+                  "bst:max_depth": 6,
+                  "bst:eta": 0.3,
                   "subsample": 0.8,
                   "colsample_bytree": 1,
                   "silent": 1,
